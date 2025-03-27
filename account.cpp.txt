@@ -1,0 +1,69 @@
+// account.cpp
+#include"account.h"
+#include<iostream>
+//构造函数的实现
+SavingsAccount::SavingsAccount(int date, int id, double rate) {
+	m_id = id;
+	m_lastDate = date;
+	m_rate = rate;
+	std::cout << date << "	#" << m_id << " is created" << std::endl;
+}
+
+//显示账户信息的实现
+void SavingsAccount::show() {
+	std::cout << "#" << m_id << "	Balance:  " << m_balance;
+}
+
+//存款的实现
+void SavingsAccount::deposit(int date, double amount) {
+	m_accumulation = accumulate(date);
+	m_balance += amount;
+	m_lastDate = date;
+	record(date, amount);
+	
+}
+
+//取款的实现
+void SavingsAccount::withdraw(int date, double amount) {
+	m_accumulation = accumulate(date);
+	m_balance -= amount;
+	m_lastDate = date;
+	record(date, -amount);
+}
+
+//结算利息的实现
+void SavingsAccount::settle(int date) {
+	m_accumulation = accumulate(date);
+	double amount = m_accumulation * m_rate / 365.0;
+	amount = floor(amount * 100 + 0.5) / 100;
+	m_lastDate = date;
+	m_balance += amount;
+	m_accumulation = 0;
+	record(date, amount);
+}
+
+//计算余额日积累的实现
+double SavingsAccount::accumulate(int date) {
+	m_accumulation += (date - m_lastDate) * m_balance;
+	m_lastDate = date;
+	return m_accumulation;
+}
+
+//余额变动时记录的实现
+void SavingsAccount::record(int date, double amount) {
+	std::cout << date << "	" << m_id << "	" << amount 
+		      << "	" << m_balance << std::endl;
+}
+
+//得到id, balance, rate
+int SavingsAccount::getId() {
+	return m_id;
+}
+
+double SavingsAccount::getBalance() {
+	return m_balance;
+}
+
+double SavingsAccount::getRate() {
+	return m_rate;
+}
