@@ -1,0 +1,23 @@
+// account.h
+#ifndef _ACCOUNT_H
+#define _ACCOUNT_H
+class SavingsAccount {
+private:
+	int m_id;		//账户id
+	double m_balance = 0;		//余额
+	double m_rate = 0.015;		//年利率
+	int m_lastDate = 1;		//上一次操作时间
+	double m_accumulation = 0;		//距离上次余额变化到现在 余额日积累
+public:
+	SavingsAccount(int date, int id, double rate);		//初始化账户1
+	int getId();
+	double getBalance();
+	double getRate();
+	void record(int date, double amount);		//余额变动时记录
+	double accumulate(int date);		//计算余额日积累
+	void show();		//显示账户信息1
+	void deposit(int date, double amount);		//存款
+	void withdraw(int date, double amount);		//取款
+	void settle(int date);		//结算利息
+};
+#endif 
