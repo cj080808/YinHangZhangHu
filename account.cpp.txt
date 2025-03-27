@@ -1,6 +1,7 @@
 // account.cpp
 #include"account.h"
 #include<iostream>
+#include<cmath>
 //构造函数的实现
 SavingsAccount::SavingsAccount(int date, int id, double rate) {
 	m_id = id;
@@ -51,7 +52,7 @@ double SavingsAccount::accumulate(int date) {
 
 //余额变动时记录的实现
 void SavingsAccount::record(int date, double amount) {
-	std::cout << date << "	" << m_id << "	" << amount 
+	std::cout << date << "	#" << m_id << "	" << amount 
 		      << "	" << m_balance << std::endl;
 }
 
