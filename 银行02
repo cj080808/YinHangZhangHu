@@ -1,0 +1,81 @@
+// account.cpp
+#include"account.h"
+<<<<<<< HEAD
+#include<cmath>
+=======
+#include<iostream>
+#include<cmath>
+//构造函数的实现
+SavingsAccount::SavingsAccount(int date, int id, double rate) {
+	m_id = id;
+	m_lastDate = date;
+	m_rate = rate;
+	std::cout << date << "	#" << m_id << " is created" << std::endl;
+}
+>>>>>>> 1938e07278fa6c3d357882dc41525ddb59cc4e49
+
+double SavingsAccount::total = 0;
+
+//构造函数的实现
+SavingsAccount::SavingsAccount(Date date, std::string id, double rate) :m_id(id), m_lastDate(date), m_rate(rate){
+	date.showTime();
+	std::cout << "	#" << m_id << "  created" << std::endl;
+}
+
+//存款的实现
+void SavingsAccount::deposit(Date date, double amount, std::string massage) {
+	m_accumulation = accumulate(date);
+	m_balance += amount;
+	record(date, amount, massage);
+
+}
+
+//取款的实现
+void SavingsAccount::withdraw(Date date, double amount, std::string massage) {
+	m_accumulation = accumulate(date);
+	m_balance -= amount;
+	record(date, -amount, massage);
+}
+
+//结算利息的实现
+void SavingsAccount::settle(Date date) {
+	m_accumulation = accumulate(date);
+	double amount = m_accumulation * m_rate / 366.0;
+	amount = floor(amount * 100 + 0.5) / 100;
+	m_balance += amount;
+	m_accumulation = 0;
+	record(date, amount, "interest");
+}
+
+//计算余额日积累的实现
+double SavingsAccount::accumulate(Date date) {
+	m_accumulation += date.timeOfGap(m_lastDate) * m_balance;
+	m_lastDate = date;
+	return m_accumulation;
+}
+
+//余额变动时记录的实现
+<<<<<<< HEAD
+void SavingsAccount::record(Date date, double amount, std::string massage) {
+	total += amount;
+	date.showTime();
+	std::cout << "	#" << m_id << "	" << amount << "	" << m_balance << "		" << massage << std::endl;
+}
+=======
+void SavingsAccount::record(int date, double amount) {
+	std::cout << date << "	#" << m_id << "	" << amount 
+		      << "	" << m_balance << std::endl;
+}
+
+//得到id, balance, rate
+int SavingsAccount::getId() {
+	return m_id;
+}
+
+double SavingsAccount::getBalance() {
+	return m_balance;
+}
+
+double SavingsAccount::getRate() {
+	return m_rate;
+}
