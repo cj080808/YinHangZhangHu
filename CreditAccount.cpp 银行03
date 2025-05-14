@@ -1,0 +1,34 @@
+//CreditAccount.cpp
+
+#include"CreditAccount.h"
+#include"Accumulator.h"
+#include"Date.h"
+#include"Account.h"
+#include<iostream>
+
+void CreditAccount::deposit(Date date, double amount, std::string message) {
+	record(date, amount, message);
+	m_acc.change(date, getDebt());
+}
+
+void CreditAccount::withdraw(Date date, double amount, std::string message) {
+	record(date, -amount, message);
+	m_acc.change(date, getDebt());
+}
+
+void CreditAccount::settle(Date date) {
+	double interest = m_acc.getSum(date) * m_rate;
+
+	if (interest != 0) {
+		record(date, interest, "interest");
+	}
+	if (date.getMonth() == 1) {
+		record(date, -m_fee, "annual fee");
+		m_acc.reset(date, getDebt());
+	}
+	m_acc.reset(date, getDebt());
+}
+
+void CreditAccount::show() {
+	std::cout << getId() << "	Balance: " << getBalance() << "	Available credit:" << getAvailableCredit() << std::endl;
+}
