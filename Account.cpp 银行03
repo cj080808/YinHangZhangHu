@@ -1,0 +1,21 @@
+//Account.cpp
+
+#include "Account.h"
+#include"Date.h"
+#include<string>
+#include<iostream>
+#include<cmath>
+double Account::total = 0;
+
+Account::Account(Date date, std::string id) : m_id(id) {
+	date.showTime();
+	std::cout << "	#" << m_id << " created" << std::endl;
+}
+
+void Account::record(Date date, double amount, std::string massage) {
+	amount = floor(amount * 100 + 0.5) / 100;
+	m_balance += amount;
+	total += amount;
+	date.showTime();
+	std::cout << "	#" << m_id << "	" << amount << "	" << m_balance << "		" << massage << std::endl;
+}
