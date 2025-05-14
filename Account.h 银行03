@@ -1,0 +1,26 @@
+//Account.h
+//基类
+
+#ifndef _ACCOUNT_H_
+#define _ACCOUNT_H_
+#include<string>
+#include<iostream>
+#include"Accumulator.h"
+#include"Date.h"
+class Account {
+private:
+	std::string m_id = "";
+	double m_balance = 0;
+	static double total;
+
+public:
+	Account(Date date, std::string id);
+	void record(Date date, double amount, std::string massage);
+	std::string getId() const { return m_id; }
+	double getBalance() const { return m_balance; }
+	void show() const { std::cout << m_id << "	" << "Balance: " << m_balance; }
+	static double getTotal() { return total; }
+};
+
+
+#endif
