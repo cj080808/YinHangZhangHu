@@ -1,0 +1,30 @@
+//Date.cpp
+
+#include"Date.h"
+#include<iostream>
+
+int Date::getMaxDay() const {
+	int Month[] = { 0, 31, 59, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+	int days = Month[m_month] - Month[m_month - 1];
+	if (isLeapYear() && getMonth() == 2) { days++; }
+	return days;
+}
+int Date::timeOfGap(Date lastdate) const {
+	int Month[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+	int days1 = Month[lastdate.getMonth() - 1] + lastdate.getDay();
+	if (lastdate.getMonth() > 2 && lastdate.isLeapYear()) { days1++; }
+	int days2 = Month[getMonth() - 1] + getDay();
+	if (getMonth() > 2 && isLeapYear()) { days2++; }
+
+	for (int y = 1; y < lastdate.getYear(); y++) {
+		days1 += 365;
+		if (y % 400 == 0 || y % 4 == 0 && y % 100 != 0) { days1++; }
+	}
+	for (int y = 1; y < getYear(); y++) {
+		days2 += 365;
+		if (y % 400 == 0 || y % 4 == 0 && y % 100 != 0) { days2++; }
+	}
+
+	int dayOfGap = days2 - days1;
+	return dayOfGap;
+}
