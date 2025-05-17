@@ -1,0 +1,27 @@
+//SavingsAccount.h
+
+#ifndef _SAVINGSACCOUNT_H_
+#define _SAVINGSACCOUNT_H_
+
+#include"Date.h"
+#include"Accumulator.h"
+#include"Account.h"
+#include<string>
+#include<iostream>
+
+class SavingsAccount :public Account {
+private:
+	Accumulator m_acc;
+	double m_rate;
+
+public:
+	SavingsAccount(Date date, std::string id, double rate)
+		: m_rate(rate), Account(date, id), m_acc(date, 0){}
+	double getRate() const { return m_rate; }
+
+	virtual void settle(const Date& date);
+	virtual void deposit(const Date& date, double amount, std::string massage);
+	virtual void withdraw(const Date& date, double amount, std::string massage);
+};
+
+#endif
