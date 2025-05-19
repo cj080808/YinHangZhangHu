@@ -1,0 +1,46 @@
+//Account.cpp
+
+#include"Account.h"
+#include"Accumulator.h"
+#include"Date.h"
+#include"AccountRecord.h"
+#include<string>
+#include<iostream>
+#include<cmath>
+#include<map>
+
+double Account::total = 0;
+//static std::multimap<Date, AccountRecord> recordAccount;
+std::multimap<Date, AccountRecord> Account::recordAccount;
+
+Account::Account(const Date& date, std::string id) : m_id(id), m_balance(0) {
+	date.showTime();
+	std::cout << "	#" << m_id << "	created" << std::endl;
+}
+
+void Account::record(const Date& date, double amount, std::string massage) {
+	amount = floor(amount * 100 + 0.5) / 100;
+	m_balance += amount;
+	total += amount;
+	date.showTime();
+	std::cout << "	#" << m_id << "	" << amount << "	" << m_balance << "		" << massage << std::endl;
+
+	AccountRecord record(date, amount, getBalance(), massage, this);
+	recordAccount.insert({ date, record });
+
+}
+
+void Account::show() const {
+	std::cout << m_id << "	Balance:" << m_balance;
+}
+
+void Account::query(const Date& date1, const Date& date2) {
+	auto lower = recordAccount.lower_bound(date1);
+	auto upper = recordAccount.upper_bound(date2);
+
+	for (auto& it = lower; it != upper; ++it) {
+		std::cout << it->first << '\t' << it->second.getAccount()->getId() << '\t'
+			<< it->second.getAmount() << '\t' << it->second.getBalance() << '\t'
+			<< it->second.getMessage() << std::endl;
+	}
+}
