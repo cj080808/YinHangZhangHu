@@ -1,0 +1,30 @@
+//AccountRecord.h
+
+#ifndef ACCOUNTRECORD_H_
+#define ACCOUNTRECORD_H_
+
+#include"Date.h"
+#include<string>
+
+class Account;
+
+class AccountRecord {
+private:
+	Date m_date;
+	const Account* m_account;
+	double m_amount;
+	double m_balance;
+	std::string m_message;
+
+public:
+	AccountRecord(const Date& date, double amount, double balance, std::string message, const Account* account)
+		: m_date(date), m_amount(amount), m_balance(balance), m_message(message), m_account(account){ }
+
+	Date getDate() const { return m_date; }
+	const Account* getAccount() const { return m_account; }
+	double getAmount() const { return m_amount; }
+	double getBalance()const { return m_balance; }
+	const std::string& getMessage() const { return m_message; }
+};
+
+#endif
