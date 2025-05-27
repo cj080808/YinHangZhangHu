@@ -1,0 +1,37 @@
+//Account.h
+
+#ifndef _ACCOUNT_H_
+#define _ACCOUNT_H_
+
+#include"Date.h"
+#include"Accumulator.h"
+#include"AccountRecord.h"
+#include<iostream>
+#include<string>
+#include<map>
+
+class Account {
+private:
+	std::string m_id;
+	double m_balance;
+	static double total;
+
+	static std::multimap<Date, AccountRecord> recordAccount;
+
+public:
+	Account(const Date& date, std::string id);
+	std::string getId() const { return m_id; }
+	double getBalance() const { return m_balance; }
+	void record(const Date& date, double amount, std::string massage);		//	记录
+	static double getTotal() { return total; }
+	static void setTotal(double money);
+
+	virtual void show() const;
+	virtual void settle(const Date& date) = 0;
+	virtual void deposit(const Date& date, double amount, std::string massage) = 0;
+	virtual void withdraw(const Date& date, double amount, std::string massage) = 0;
+
+	static void query(const Date& date1, const Date& date2);
+};
+
+#endif
