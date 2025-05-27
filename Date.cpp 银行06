@@ -1,0 +1,72 @@
+//Date.cpp
+
+#include"Date.h"
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<stdexcept>
+
+int Date::getMaxDay() const {
+	int Month[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+	int days = Month[m_month] - Month[m_month - 1];
+	if (isLeapYear() && getMonth() == 2) { days++; }
+	return days;
+}
+int Date::timeOfGap(Date lastdate) const {
+	int Month[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+	int days1 = Month[lastdate.getMonth() - 1] + lastdate.getDay();
+	if (lastdate.getMonth() > 2 && lastdate.isLeapYear()) { days1++; }
+	int days2 = Month[getMonth() - 1] + getDay();
+	if (getMonth() > 2 && isLeapYear()) { days2++; }
+
+	for (int y = 1; y < lastdate.getYear(); y++) {
+		days1 += 365;
+		if (y % 400 == 0 || y % 4 == 0 && y % 100 != 0) { days1++; }
+	}
+	for (int y = 1; y < getYear(); y++) {
+		days2 += 365;
+		if (y % 400 == 0 || y % 4 == 0 && y % 100 != 0) { days2++; }
+	}
+
+	int dayOfGap = days2 - days1;
+	return dayOfGap;
+}
+
+Date Date::read() {
+	std::string data;
+	std::cin >> data;
+	Date date = parseDate(data);
+	return date;
+}
+
+std::ostream& operator<<(std::ostream& os, const Date& date) {
+	os << date.m_year << "-" << date.m_month << "-" << date.m_day;
+	return os;
+}
+
+Date Date::parseDate(const std::string& dateStr) {
+	std::istringstream iss(dateStr);
+	int year, month, day;
+	char slash1, slash2;
+
+	if (iss >> year >> slash1 >> month >> slash2 >> day) {
+		if (slash1 == '/' && slash2 == '/' && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+			return Date(year, month, day);
+		}
+	}
+	return Date(0, 0, 0);
+}
+
+bool Date::operator<(const Date& other) const {
+	if (m_year != other.m_year) {
+		return m_year < other.m_year;
+	}
+	if (m_month != other.m_month) {
+		return m_month < other.m_month;
+	}
+	return m_day < other.m_day;
+}
+
+bool Date::operator==(const Date& other) const {
+	return (m_year == other.m_year && m_month == other.m_month && m_day == other.m_day);
+}
