@@ -1,1 +1,21 @@
+#ifndef _USER_H_
+#define _USER_H_
 
+#include <string>
+
+class User {
+private:
+    std::string username;
+    std::string password;
+
+public:
+    User() : username(""), password("") {}
+
+    void setUsername(const std::string& username) { this->username = username; }
+    void setPassword(const std::string& password) { this->password = password; }
+
+    std::string getUsername() const { return username; }
+    std::string getPassword() const { return password; }
+};
+
+#endif
