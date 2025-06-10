@@ -14,10 +14,7 @@ void UserManager::loadUsers() {
         std::istringstream iss(line);
         std::string username, password;
         if (iss >> username >> password) {
-            User user;
-            user.setUsername(username);
-            user.setPassword(password);
-            users[username] = user;
+            users[username] = User(username, password); // 使用带参数的构造函数
         }
     }
     file.close();
@@ -37,10 +34,7 @@ bool UserManager::registerUser(const std::string& username, const std::string& p
     if (users.find(username) != users.end()) {
         return false; // 用户已存在
     }
-    User user;
-    user.setUsername(username);
-    user.setPassword(password);
-    users[username] = user;
+    users[username] = User(username, password); // 使用带参数的构造函数
     saveUsers();
     return true;
 }
