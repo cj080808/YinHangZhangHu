@@ -1,0 +1,25 @@
+#ifndef _USERMANAGER_H_
+#define _USERMANAGER_H_
+
+#include <string>
+#include <unordered_map>
+#include <fstream>
+#include "User.h"
+
+class UserManager {
+private:
+    std::unordered_map<std::string, User> users;
+    std::string userFilePath;
+
+public:
+    UserManager(const std::string& filePath) : userFilePath(filePath) {
+        loadUsers();
+    }
+
+    bool registerUser(const std::string& username, const std::string& password);
+    bool loginUser(const std::string& username, const std::string& password);
+    void loadUsers();
+    void saveUsers();
+};
+
+#endif
