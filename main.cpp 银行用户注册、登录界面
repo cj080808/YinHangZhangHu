@@ -1,0 +1,318 @@
+#include "Account.h"
+#include "Accumulator.h"
+#include "Date.h"
+#include "SavingsAccount.h"
+#include "CreditAccount.h"
+#include "AccountException.h"
+#include "UserManager.h"
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <limits>
+#include <unordered_map>
+
+using namespace std;
+
+struct deleter {
+    template <class T> void operator () (T* p) { delete p; }
+};
+
+// 执行文件中的命令
+void executeCommandsFromFile(Date& date, vector<Account*>& accounts) {
+    ifstream file("commands.txt");
+    if (file.is_open()) {
+        string line;
+        while (getline(file, line)) {
+            istringstream iss(line);
+            char cmd;
+            iss >> cmd;
+
+            char type;
+            int index, day;
+            double amount, credit, rate, fee;
+            string id, desc;
+            Account* account;
+            Date date1, date2;
+
+            switch (cmd) {
+            case 'a': // 添加账户
+                iss >> type >> id;
+                if (type == 's') {
+                    iss >> rate;
+                    account = new SavingsAccount(date, id, rate);
+                }
+                else {
+                    iss >> credit >> rate >> fee;
+                    account = new CreditAccount(date, id, credit, rate, fee);
+                }
+                accounts.push_back(account);
+                break;
+            case 'd': // 存款
+                iss >> index >> amount;
+                getline(iss >> ws, desc);
+                accounts[index]->deposit(date, amount, desc);
+                break;
+            case 'w': // 取款
+                iss >> index >> amount;
+                getline(iss >> ws, desc);
+                accounts[index]->withdraw(date, amount, desc);
+                break;
+            case 's': // 显示账户
+                for (size_t i = 0; i < accounts.size(); i++) {
+                    cout << "[" << i << "] ";
+                    accounts[i]->show();
+                    cout << endl;
+                }
+                break;
+            case 'c': // 更改日期
+                iss >> day;
+                date = Date(date.getYear(), date.getMonth(), day);
+                break;
+            case 'n': // 下一个月
+                if (date.getMonth() == 12)
+                    date = Date(date.getYear() + 1, 1, 1);
+                else
+                    date = Date(date.getYear(), date.getMonth() + 1, 1);
+                for (vector<Account*>::iterator iter = accounts.begin(); iter != accounts.end(); ++iter)
+                    (*iter)->settle(date);
+                break;
+            case 'q': // 查询交易记录
+                date1 = Date::read();
+                date2 = Date::read();
+                Account::query(date1, date2);
+                break;
+            }
+        }
+        file.close();
+    }
+}
+
+// 将命令写入文件
+void addCommandToFile(const string& command) {
+    ofstream file("commands.txt", ios::app);
+    if (file.is_open()) {
+        file << command << endl;
+        file.close();
+    }
+}
+
+// 清除所有记录
+void clearAllRecords(Date& date, vector<Account*>& accounts) {
+    if (std::remove("commands.txt") == 0) {
+        cout << "所有记录已清除" << endl;
+    }
+    else {
+        cout << "清除记录失败" << endl;
+    }
+
+    for_each(accounts.begin(), accounts.end(), deleter());
+    accounts.clear();
+    Account::setTotal(0);
+    date = Date(2008, 11, 1);
+}
+
+// 处理创建账户
+void handleCreateAccount(Date& date, vector<Account*>& accounts, string& command) {
+    char type;
+    string id;
+    double rate, credit, fee;
+    Account* account;
+
+    cin >> type >> id;
+    command += " " + string(1, type) + " " + id;
+    if (type == 's') {
+        cin >> rate;
+        command += " " + to_string(rate);
+        account = new SavingsAccount(date, id, rate);
+    }
+    else {
+        cin >> credit >> rate >> fee;
+        command += " " + to_string(credit) + " " + to_string(rate) + " " + to_string(fee);
+        account = new CreditAccount(date, id, credit, rate, fee);
+    }
+    accounts.push_back(account);
+}
+
+// 处理存款
+void handleDeposit(Date& date, vector<Account*>& accounts, string& command) {
+    int index;
+    double amount;
+    string desc;
+
+    cin >> index >> amount;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, desc);
+    command += " " + to_string(index) + " " + to_string(amount) + desc;
+    accounts[index]->deposit(date, amount, desc);
+}
+
+// 处理取款
+void handleWithdraw(Date& date, vector<Account*>& accounts, string& command) {
+    int index;
+    double amount;
+    string desc;
+
+    cin >> index >> amount;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, desc);
+    if (amount <= accounts[index]->getBalance()) {
+        command += " " + to_string(index) + " " + to_string(amount) + desc;
+    }
+    try {
+        accounts[index]->withdraw(date, amount, desc);
+    }
+    catch (const AccountException& e) {
+        std::cerr << "Account error: " << e.what() << std::endl;
+        const Account* errAccount = e.getAccount();
+        std::cerr << "  Account ID: #" << errAccount->getId() << std::endl;
+    }
+}
+
+// 显示账户信息
+void handleShowAccounts(const vector<Account*>& accounts) {
+    for (size_t i = 0; i < accounts.size(); i++) {
+        cout << "[" << i << "] ";
+        accounts[i]->show();
+        cout << endl;
+    }
+}
+
+// 更改日期
+void handleChangeDate(Date& date, string& command) {
+    int day;
+    cin >> day;
+    try {
+        if (day < date.getDay()) {
+            throw std::invalid_argument("You cannot specify a previous day");
+        }
+        else if (day > date.getMaxDay()) {
+            throw std::invalid_argument("Invalid day");
+        }
+        else {
+            date = Date(date.getYear(), date.getMonth(), day);
+            command += " " + to_string(day);
+        }
+    }
+    catch (const std::invalid_argument& e) {
+        std::cout << "Date error: " << e.what() << std::endl;
+    }
+}
+
+// 下一个月
+void handleNextMonth(Date& date, vector<Account*>& accounts, string& command) {
+    if (date.getMonth() == 12)
+        date = Date(date.getYear() + 1, 1, 1);
+    else
+        date = Date(date.getYear(), date.getMonth() + 1, 1);
+    for (vector<Account*>::iterator iter = accounts.begin(); iter != accounts.end(); ++iter)
+        (*iter)->settle(date);
+    command += "";
+}
+
+// 查询交易记录
+void handleQuery(Date& date, string& command) {
+    Date date1 = Date::read();
+    Date date2 = Date::read();
+    Account::query(date1, date2);
+    command += " " + to_string(date1.getYear()) + "/" + to_string(date1.getMonth()) + "/" + to_string(date1.getDay()) + " "
+        + to_string(date2.getYear()) + "/" + to_string(date2.getMonth()) + "/" + to_string(date2.getDay());
+}
+
+// 重置
+void handleReset(Date& date, vector<Account*>& accounts, string& command) {
+    clearAllRecords(date, accounts);
+    command = ""; // 清空命令记录
+}
+
+// 主程序循环
+void mainLoop(Date& date, vector<Account*>& accounts, UserManager& userManager) {
+    cout << "(a)add account (d)deposit (w)withdraw (s)show (c)change day (n)next month (q)query (e)exit (r)reset" << endl;
+
+    char cmd;
+    do {
+        date.showTime();
+        cout << "\tTotal: " << Account::getTotal() << "\tcommand> ";
+
+        string command;
+        cin >> cmd;
+        command += cmd;
+
+        switch (cmd) {
+        case 'a': // 添加账户
+            handleCreateAccount(date, accounts, command);
+            break;
+        case 'd': // 存款
+            handleDeposit(date, accounts, command);
+            break;
+        case 'w': // 取款
+            handleWithdraw(date, accounts, command);
+            break;
+        case 's': // 显示账户
+            handleShowAccounts(accounts);
+            break;
+        case 'c': // 更改日期
+            handleChangeDate(date, command);
+            break;
+        case 'n': // 下一个月
+            handleNextMonth(date, accounts, command);
+            break;
+        case 'q': // 查询交易记录
+            handleQuery(date, command);
+            break;
+        case 'r': // 重置
+            handleReset(date, accounts, command);
+            break;
+        }
+
+        if (cmd != 's' && cmd != 'e' && cmd != 'r') {
+            addCommandToFile(command);
+        }
+
+    } while (cmd != 'e');
+}
+
+int main() {
+    UserManager userManager("users.txt");
+    string username, password;
+
+    cout << "欢迎使用银行账户管理系统" << endl;
+    cout << "请输入用户名: ";
+    cin >> username;
+    cout << "请输入密码: ";
+    cin >> password;
+
+    if (userManager.loginUser(username, password)) {
+        cout << "登录成功！" << endl;
+    }
+    else {
+        cout << "用户不存在，是否注册新用户？(y/n): ";
+        char choice;
+        cin >> choice;
+        if (choice == 'y') {
+            if (userManager.registerUser(username, password)) {
+                cout << "注册成功！" << endl;
+            }
+            else {
+                cout << "注册失败，用户名已存在。" << endl;
+                return 1;
+            }
+        }
+        else {
+            cout << "退出程序。" << endl;
+            return 1;
+        }
+    }
+
+    Date date(2008, 11, 1);
+    vector<Account*> accounts;
+
+    executeCommandsFromFile(date, accounts);
+
+    mainLoop(date, accounts, userManager);
+
+    for_each(accounts.begin(), accounts.end(), deleter());
+    return 0;
+}
