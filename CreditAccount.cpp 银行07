@@ -1,0 +1,51 @@
+//CreditAccount.cpp
+
+#include"Date.h"
+#include"Accumulator.h"
+#include"Account.h"
+#include"CreditAccount.h"
+#include"AccountException.h"
+#include<stdexcept>
+
+//欠款
+double CreditAccount::getDebt() const{
+	double balance = getBalance();
+	return (balance < 0 ? balance : 0);
+}
+
+//可用限度
+double CreditAccount::getAvailableCredit() const {
+	return m_credit + getDebt();
+}
+
+//计息
+void CreditAccount::settle(const Date& date) {
+	
+	double interest = m_acc.getSum(date) * m_rate;
+
+	if (interest != 0) {
+		record(date, interest, "interest");
+	}
+	if (date.getMonth() == 1) {
+		record(date, -m_fee, "annual fee");
+	}
+	m_acc.reset(date, getDebt());
+}
+
+//存款
+void CreditAccount::deposit(const Date& date, double amount, std::string massage) {
+	record(date, amount, massage);
+	m_acc.change(date, getDebt());
+}
+
+//取款
+void CreditAccount::withdraw(const Date& date, double amount, std::string massage) {
+	if (amount > getAvailableCredit()) { throw AccountException(this, "Over - withdrawal amount"); }
+	record(date, -amount, massage);
+	m_acc.change(date, getDebt());
+}
+
+//显示信息
+void CreditAccount::show() const {
+	std::cout << getId() << "	Balance: " << getBalance() << "	Available credit:" << getAvailableCredit();
+}
