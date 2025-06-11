@@ -1,0 +1,108 @@
+//Account.cpp
+
+#include "Account.h"
+#include "Accumulator.h"
+#include "Date.h"
+#include "AccountRecord.h"
+#include <cmath>
+#include <map>
+#include <vector>
+#include <algorithm>
+
+double Account::total = 0;
+std::multimap<Date, AccountRecord> Account::recordAccount;
+
+Account::Account(const Date& date, std::string id) : m_id(id), m_balance(0) {
+    date.showTime();
+    std::cout << "	#" << m_id << "	created" << std::endl;
+}
+
+//操作记录
+void Account::record(const Date& date, double amount, std::string message) {
+    amount = floor(amount * 100 + 0.5) / 100;
+    m_balance += amount;
+    total += amount;
+    date.showTime();
+    std::cout << "	#" << m_id << "	" << amount << "	" << m_balance << "		" << message << std::endl;
+
+    AccountRecord record(date, amount, getBalance(), message, this);
+    recordAccount.insert({ date, record });
+}
+
+//显示信息
+void Account::show() const {
+    std::cout << m_id << "	Balance:" << m_balance;
+}
+
+//查询时间交易记录
+void Account::query(const Date& date1, const Date& date2) {
+    auto lower = recordAccount.lower_bound(date1);
+    auto upper = recordAccount.upper_bound(date2);
+
+    for (auto& it = lower; it != upper; ++it) {
+        std::cout << it->first << '\t' << it->second.getAccount()->getId() << '\t'
+            << it->second.getAmount() << '\t' << it->second.getBalance() << '\t'
+            << it->second.getMessage() << std::endl;
+    }
+}
+
+//设置总账户钱数
+void Account::setTotal(double money) {
+    total = money;
+}
+
+//月收入与开销
+std::pair<double, double> Account::getMonthlyStatistics(const Date& date) const {
+    double income = 0.0;
+    double expenses = 0.0;
+
+    // 当月的第一天和下个月的第一天
+    Date startOfMonth(date.getYear(), date.getMonth(), 1);
+    Date startOfNextMonth(date.getYear(), date.getMonth() + 1, 1);
+
+    auto lower = recordAccount.lower_bound(startOfMonth);
+    auto upper = recordAccount.upper_bound(startOfNextMonth);
+
+    for (auto it = lower; it != upper; ++it) {
+        if (it->second.getAmount() > 0) {
+            income += it->second.getAmount(); // 收入
+        }
+        else {
+            expenses += it->second.getAmount(); // 支出
+        }
+    }
+
+    return { income, expenses };
+}
+
+//按金额排序交易记录
+std::vector<AccountRecord> Account::getSortedTransactions(const Date& date1, const Date& date2) const {
+
+    std::vector<AccountRecord> transactions;
+
+    auto lower = recordAccount.lower_bound(date1);
+    auto upper = recordAccount.upper_bound(date2);
+
+    for (auto it = lower; it != upper; ++it) {
+        if (it->second.getAccount() == this) { // 获取当前账户的交易记录
+            transactions.push_back(it->second);
+        }
+    }
+
+    bubbleSort(transactions); // 进行排序
+
+    return transactions;
+}
+
+void bubbleSort(std::vector<AccountRecord>& transactions) {
+    bool swapped;
+    do {
+        swapped = false;
+        for (size_t i = 0; i < transactions.size() - 1; ++i) {
+            if (transactions[i].getAmount() < transactions[i + 1].getAmount()) {
+                std::swap(transactions[i], transactions[i + 1]);
+                swapped = true;
+            }
+        }
+    } while (swapped);
+}
