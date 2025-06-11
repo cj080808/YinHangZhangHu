@@ -1,0 +1,51 @@
+//UserManager.cpp
+
+#include "UserManager.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+//加载
+void UserManager::loadUsers() {
+    std::ifstream file(userFilePath);   //打开
+    if (!file.is_open()) return;
+
+    std::string line;
+    while (std::getline(file, line)) {  //按行读取
+        std::istringstream iss(line);
+        std::string username, password;
+        if (iss >> username >> password) {  //解析
+            users[username] = User(username, password);
+        }
+    }
+    file.close();   //关闭文件
+}
+
+//写入
+void UserManager::saveUsers() {
+    std::ofstream file(userFilePath);
+    if (!file.is_open()) return;
+
+    for (const auto& pair : users) {
+        file << pair.first << " " << pair.second.getPassword() << std::endl;
+    }
+    file.close();
+}
+
+//注册
+bool UserManager::registerUser(const std::string& username, const std::string& password) {
+    if (users.find(username) != users.end()) {
+        return false; // 用户已存在
+    }
+    users[username] = User(username, password);
+    saveUsers();
+    return true;
+}
+
+//登录
+bool UserManager::loginUser(const std::string& username, const std::string& password) {
+    if (users.find(username) == users.end()) {
+        return false; // 用户不存在
+    }
+    return users[username].getPassword() == password;
+}
