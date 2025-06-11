@@ -1,0 +1,36 @@
+// Date.h
+
+#ifndef _DATE_H
+#define _DATE_H
+#include<iostream>
+class Date {
+private:
+	int m_year = 0;
+	int m_month = 0;
+	int m_day = 0;
+
+public:
+	Date() {};
+	Date(int year, int month, int day);
+
+	int getDay() const { return m_day; }
+	int getMonth() const { return m_month; }
+	int getYear() const { return m_year; }
+	int timeOfGap(Date lastdate) const;		//时间间隔
+	int getMaxDay() const;	//获取最大天数
+
+	void showTime() const { std::cout << m_year << "-" << m_month << "-" << m_day; }
+	bool isLeapYear() const { return m_year % 400 == 0 || (m_year % 4 == 0 && m_year % 100 != 0); }    //判断闰年
+	
+	friend std::ostream& operator<<(std::ostream& os, const Date& date);	//重载<<
+	bool operator<(const Date& other) const;	//重载<
+	bool operator==(const Date& other) const;	//重载==
+
+	static Date parseDate(const std::string& dateStr);		//解析字符串（XX/XX/XX）
+	static Date read();		//读入时间
+
+};
+
+std::ostream& operator<<(std::ostream& os, const Date& date);
+
+#endif
