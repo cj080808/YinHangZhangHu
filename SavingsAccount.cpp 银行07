@@ -1,0 +1,35 @@
+//SavingsAccount.cpp
+
+#include"Date.h"
+#include"Accumulator.h"
+#include"Account.h"
+#include"SavingsAccount.h"
+#include"AccountException.h"
+#include<string>
+#include<iostream>
+#include<stdexcept>
+
+//存款
+void SavingsAccount::deposit(const Date& date, double amount, std::string massage) {
+	record(date, amount, massage);
+	m_acc.change(date, getBalance());
+}
+
+//取款
+void SavingsAccount::withdraw(const Date& date, double amount, std::string massage) {
+	if (amount > getBalance()) { throw AccountException(this, "Over - withdrawal amount"); }
+	record(date, -amount, massage);
+	m_acc.change(date, getBalance());
+}
+
+//计息（1月）
+void SavingsAccount::settle(const Date& date) {
+	if (date.getMonth() != 1) { return; }
+	m_acc.change(date, getBalance());
+	double interest = m_acc.getSum(date) * m_rate / date.timeOfGap(Date(date.getYear() - 1, 1, 1));
+	if (interest != 0) {
+		record(date, interest, "interest");
+		m_acc.reset(date, getBalance());
+	}
+	
+}
