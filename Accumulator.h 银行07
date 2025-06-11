@@ -1,0 +1,30 @@
+//Accumulator.h
+
+#ifndef _ACCUMULATOR_H
+#define _ACCUMULATOR_H
+#include<string>
+#include"Date.h"
+class Accumulator {
+private:
+	Date m_lastDate;	//上一次操作日期
+	double m_value = 0;		//当前余额
+	double m_sum = 0;		//日积累总量
+public:
+	Accumulator(Date date, double value) : m_lastDate(date), m_value(value) {}
+	double getSum(Date date) const {	//总日积累量
+		return m_sum + m_value * date.timeOfGap(m_lastDate);
+	}
+	void change(Date date, double value) {		//余额变动
+		m_sum = getSum(date);
+		m_lastDate = date;
+		m_value = value;
+	}
+	void reset(Date date, double value) {	//清零
+		m_lastDate = date;
+		m_value = value;
+		m_sum = 0;
+	}
+
+};
+
+#endif
