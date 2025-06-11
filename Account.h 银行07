@@ -1,0 +1,45 @@
+//Account.h
+
+#ifndef _ACCOUNT_H_
+#define _ACCOUNT_H_
+
+#include "Date.h"
+#include "Accumulator.h"
+#include "AccountRecord.h"
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+
+class Account {
+private:
+    std::string m_id;
+    double m_balance;
+    static double total;    //总钱数
+
+    static std::multimap<Date, AccountRecord> recordAccount;    //储存账户交易记录
+
+public:
+    Account(const Date& date, std::string id);
+    std::string getId() const { return m_id; }
+    double getBalance() const { return m_balance; }
+    void record(const Date& date, double amount, std::string message);  //操作记录
+    static double getTotal() { return total; }
+    
+    virtual void show() const;  //显示信息
+    virtual void settle(const Date& date) = 0;  //计息
+    virtual void deposit(const Date& date, double amount, std::string message) = 0; //存款
+    virtual void withdraw(const Date& date, double amount, std::string message) = 0;    //取款
+
+    static void setTotal(double money); //设置总账户钱数
+    static void query(const Date& date1, const Date& date2);    //查询时间交易记录
+
+    //月收入与开销
+    std::pair<double, double> getMonthlyStatistics(const Date& date) const;
+    //按金额排序交易记录
+    std::vector<AccountRecord> getSortedTransactions(const Date& date1, const Date& date2) const;
+};
+
+void bubbleSort(std::vector<AccountRecord>& transactions);
+
+#endif
