@@ -1,0 +1,36 @@
+//CreditAccount.h
+
+#ifndef _CREDITACCOUNT_H_
+#define _CREDITACCOUNT_H_
+
+#include"Date.h"
+#include"Accumulator.h"
+#include"Account.h"
+#include<string>
+#include<iostream>
+
+class CreditAccount :public Account {
+private:
+	Accumulator m_acc;
+	double m_credit;
+	double m_rate;
+	double m_fee;
+
+public:
+	CreditAccount(const Date& date, std::string id, double credit, double rate, double fee)
+		: m_credit(credit), m_rate(rate), m_fee(fee), Account(date, id), m_acc(date, 0) { }
+	double getCredit() const { return m_credit; }	//总限度
+	double getRate() const { return m_rate; }
+	double getFee() const { return m_fee; }
+	double getAvailableCredit() const;	//可用限度
+    double getDebt() const;	//欠款
+
+	virtual void settle(const Date& date);	//计息
+	virtual void deposit(const Date& date, double amount, std::string massage);	//存款
+	virtual void withdraw(const Date& date, double amount, std::string massage);	//取款
+	virtual void show() const;	//显示信息
+
+};
+
+#endif
+
