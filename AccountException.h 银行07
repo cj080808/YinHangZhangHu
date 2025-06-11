@@ -1,0 +1,21 @@
+//AccountException.h
+
+#ifndef ACCOUNTEXCEPTION_H_
+#define ACCOUNTEXCEPTION_H_
+
+#include"Account.h"
+#include<stdexcept>
+
+class AccountException : public std::runtime_error {
+
+private:
+	const Account* account;	//指向异常账户
+
+public:
+	AccountException(const Account* acc, const std::string& msg) 
+		: std::runtime_error(msg), account(acc) {}
+	//提供访问对象
+	const Account* getAccount() const { return account; }
+};
+
+#endif
