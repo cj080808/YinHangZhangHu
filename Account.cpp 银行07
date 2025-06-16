@@ -72,7 +72,7 @@ std::pair<double, double> Account::getMonthlyStatistics(const Date& date) const 
         }
     }
 
-    return { income, expenses };
+    return { income / 2, expenses / 2 };
 }
 
 //按金额排序交易记录
